@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions, HookHandlerDoneFunction } from 'fastify';
-import { createCategory, deleteCategory, getCategories, getCategoryTree, updateCategory } from '../controller/categories';
+import { createCategory, deleteCategory, getCategories, getCategoryById, getCategoryTree, updateCategory } from '../controller/categories';
 
 export const categoryRoutes = (fastify: FastifyInstance, options: FastifyPluginOptions, done: HookHandlerDoneFunction) => {
     fastify.post('/categories', {
@@ -18,7 +18,18 @@ export const categoryRoutes = (fastify: FastifyInstance, options: FastifyPluginO
 
     fastify.get('/categories/tree', getCategoryTree);
     fastify.get('/categories/all' , getCategories);
-
+    fastify.get('/category/:id', {
+        schema: {
+          params: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' }
+            },
+            required: ['id']
+          }
+        }
+      }, getCategoryById);
+      
     fastify.patch('/categories/:id', {
         schema: {
           body: {

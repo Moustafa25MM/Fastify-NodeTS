@@ -117,3 +117,26 @@ export const deleteCategory = async (request: FastifyRequest<{ Params: { id: str
       return reply.code(500).send({ error: 'An unexpected error occurred.' });
     }
 };
+
+export const getCategoryById = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const { id } = request.params;
+    try {
+      const category = await prisma.category.findUnique({
+        where: { id },
+        include: {
+          children: true, 
+          parent: true,  
+          products: true 
+        }
+      });
+  
+      if (!category) {
+        return reply.code(404).send({ error: 'Category not found.' });
+      }
+  
+      return reply.code(200).send(category);
+    } catch (error: any) {
+      request.log.error(error);
+      return reply.code(500).send({ error: 'An unexpected error occurred.' });
+    }
+  };
