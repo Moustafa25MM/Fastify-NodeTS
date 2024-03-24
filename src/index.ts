@@ -1,6 +1,7 @@
 import fastify, { FastifyInstance } from 'fastify';
 import prisma from './database';
 import { categoryRoutes } from './routes/category';
+import { productRoutes } from './routes/product';
 
 
 prisma.$connect().then(() => {
@@ -12,6 +13,7 @@ const build = async () => {
     const app = fastify({ logger: true });
     
     app.register(categoryRoutes);
+    app.register(productRoutes);
     
     return app;
 };

@@ -27,8 +27,8 @@ model Product {
   id         String   @id @default(uuid())
   name       String
   picture    String?
-  category   Category @relation(fields: [category_id], references: [id])
-  category_id String
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String
   created_at DateTime @default(now()) @map(name: "created_at")
   updated_at DateTime @default(now()) @updatedAt @map(name: "updated_at")
 

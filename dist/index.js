@@ -15,12 +15,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fastify_1 = __importDefault(require("fastify"));
 const database_1 = __importDefault(require("./database"));
 const category_1 = require("./routes/category");
+const product_1 = require("./routes/product");
 database_1.default.$connect().then(() => {
     console.log('Successfully Connected to Database.');
 });
 const build = () => __awaiter(void 0, void 0, void 0, function* () {
     const app = (0, fastify_1.default)({ logger: true });
     app.register(category_1.categoryRoutes);
+    app.register(product_1.productRoutes);
     return app;
 });
 const PORT = process.env.PORT;
