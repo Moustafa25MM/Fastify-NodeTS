@@ -16,8 +16,16 @@ const maxSize = 1024 * 1024 * 5;
 const productStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         const uploadPath = path.join(__dirname, '../..', 'uploadedImages', 'products');
-        console.log(__dirname)
-        console.log(`Uploading to ${uploadPath}`); // Add this for debugging
+        cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + randomNumber.toString() + file.originalname);
+    },
+  });
+
+  const categoryStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadPath = path.join(__dirname, '../..', 'uploadedImages', 'categories');
         cb(null, uploadPath);
     },
     filename: (req, file, cb) => {
@@ -36,8 +44,10 @@ const productStorage = multer.diskStorage({
   }
 
   const productUpload = multer({ fileFilter, storage: productStorage, limits: { fileSize: maxSize } });
+  const categoryUpload = multer({ fileFilter, storage: categoryStorage, limits: { fileSize: maxSize } });
 
   export {
     productUpload,
+    categoryUpload,
     cloudi
   };

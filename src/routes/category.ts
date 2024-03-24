@@ -1,19 +1,10 @@
 import { FastifyInstance, FastifyPluginOptions, HookHandlerDoneFunction } from 'fastify';
 import { createCategory, deleteCategory, getCategories, getCategoryById, getCategoryByIdWithProductsCount, getCategoryTree, getCategoryTreeWithProductsCount, updateCategory } from '../controller/categories';
+import { categoryUpload } from '../middlewares/uploadImages';
 
 export const categoryRoutes = (fastify: FastifyInstance, options: FastifyPluginOptions, done: HookHandlerDoneFunction) => {
     fastify.post('/categories', {
-      schema: {
-        body: {
-          type: 'object',
-          required: ['name'],
-          properties: {
-            name: { type: 'string' },
-            picture: { type: 'string', format: 'uri' }, 
-            parentId: { type: 'string' }
-          }
-        }
-      }
+        preHandler: categoryUpload.single('picture'),
     }, createCategory);
 
     fastify.get('/categories/tree', getCategoryTree);

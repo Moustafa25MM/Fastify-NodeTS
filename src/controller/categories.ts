@@ -2,9 +2,26 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import prisma from '../database';
 import { Category, CategoryCreateBody } from '../types/category';
 import { buildCategoryTree, buildCategoryTreeWithProducts, countProductsInCategory } from '../utils/categoryUtils';
+import { cloudi } from '../middlewares/uploadImages';
 
-export const createCategory = async (request: FastifyRequest<{ Body: CategoryCreateBody }>, reply: FastifyReply) => {
-    const { name, picture, parentId } = request.body;
+export const createCategory = async (request: any, reply: FastifyReply) => {
+    const { name, parentId } = request.body;
+
+    let picture = '';
+    if(request.file){
+        const uploadedImg = await cloudi.uploader.upload(request.file.path, {
+            public_id: `${Date.now}_product`,
+            width: 500,
+            height: 500,
+            crop: 'fill',
+        });      
+        picture = uploadedImg.url;
+    }
+
+    const err = request.fileValidationError;
+    if (err) {
+        return reply.status(400).send(err);
+    }
 
     if (parentId) {
         const parentCategory = await prisma.category.findUnique({
