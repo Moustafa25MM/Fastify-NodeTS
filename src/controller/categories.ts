@@ -71,3 +71,25 @@ export const createCategory = async (request: FastifyRequest<{ Body: CategoryCre
       return reply.code(500).send({ error: 'An unexpected error occurred.' });
     }
   };
+
+  export const updateCategory = async (request: FastifyRequest<{ Params: { id: string }, Body: CategoryCreateBody }>, reply: FastifyReply) => {
+    const { id } = request.params;
+    const { name, picture, parentId } = request.body;
+    try {
+      const updatedCategory = await prisma.category.update({
+        where: { id },
+        data: {
+          name,
+          picture,
+          parentId
+        }
+      });
+      return reply.code(200).send(updatedCategory);
+    } catch (error: any) {
+      request.log.error(error);
+      if (error.code === 'P2002') {
+        return reply.code(409).send({ error: 'Category name already exists.' });
+      }
+    }
+      return reply.code(500).send({ error: 'An unexpected error occurred.' });
+};
