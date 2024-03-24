@@ -1,4 +1,5 @@
 import { FastifyInstance, FastifyRequest, RouteGenericInterface } from 'fastify';
+import { Product } from './product';
 
 export interface Category {
     id: string;
@@ -6,6 +7,7 @@ export interface Category {
     picture?: string | null;
     parentId?: string | null;
     children?: Category[];
+    products? : Product[]
   }
   
 export interface CategoryCreateBody {

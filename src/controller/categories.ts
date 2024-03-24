@@ -35,6 +35,97 @@ export const createCategory = async (request: FastifyRequest<{ Body: CategoryCre
     }
   };
 
+  const countProductsInCategory = (category: Category, allCategories: Category[]): number => {
+    let count = category.products ? category.products.length : 0;
+    if (category.children && category.children.length > 0) {
+        for (const child of category.children) {
+            const childCategory = allCategories.find(c => c.id === child.id);
+            if (childCategory) {
+                count += countProductsInCategory(childCategory, allCategories);
+            }
+        }
+    }
+    return count;
+};
+
+
+
+
+const buildCategoryTreeWithProducts = (categories: Category[], parentId: string | null = null): Category[] => {
+    return categories
+        .filter(category => category.parentId === parentId)
+        .map(category => ({
+            ...category,
+            children: buildCategoryTreeWithProducts(categories, category.id),
+            productsCount: countProductsInCategory(category, categories)
+        }));
+};
+
+export const getCategoryTreeWithProductsCount = async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+        const categories = await prisma.category.findMany({
+            include: {
+                children: true,
+                products: true,
+            }
+        });
+
+        const categoryTree = buildCategoryTreeWithProducts(categories);
+
+        return reply.code(200).send(categoryTree);
+    } catch (error: any) {
+        request.log.error(error);
+        return reply.code(500).send({ error: 'An unexpected error occurred.' });
+    }
+};
+
+
+export const getCategoryByIdWithProductsCount = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const { id } = request.params;
+    
+    try {
+        const categories = await prisma.category.findMany({
+            include: {
+                children: {
+                    include: {
+                        products: true  
+                    }
+                },
+                products: true,
+            }
+        });
+
+        const category = categories.find((cat: Category) => cat.id === id);
+
+        if (!category) {
+            return reply.code(404).send({ error: 'Category not found.' });
+        }
+
+        const allCategories = [category, ...categories];
+
+        const productsCount = countProductsInCategory(category, allCategories);
+
+        const categoryWithProductsCount = {
+            ...category,
+            productsCount,
+            children: category.children.map((child: Category) => {
+                const childProductsCount = countProductsInCategory(child, allCategories);
+                return {
+                    ...child,
+                    productsCount: childProductsCount
+                };
+            })
+        };
+
+        return reply.code(200).send(categoryWithProductsCount);
+    } catch (error: any) {
+        request.log.error(error);
+        return reply.code(500).send({ error: 'An unexpected error occurred.' });
+    }
+};
+
+
+
 
   const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
     return categories
