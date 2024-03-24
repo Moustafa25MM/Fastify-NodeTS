@@ -14,7 +14,7 @@ export const createCategory = async (request: FastifyRequest<{ Body: CategoryCre
           return reply.code(400).send({ error: 'Provided parentId does not exist.' });
         }
       }
-      
+
     try {
       const newCategory = await prisma.category.create({
         data: {
@@ -55,6 +55,17 @@ export const createCategory = async (request: FastifyRequest<{ Body: CategoryCre
       const categoryTree = buildCategoryTree(categories);
       
       return reply.code(200).send(categoryTree);
+    } catch (error: any) {
+      request.log.error(error);
+      return reply.code(500).send({ error: 'An unexpected error occurred.' });
+    }
+  };
+
+  export const getCategories = async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const categories = await prisma.category.findMany();
+      
+     return reply.code(200).send(categories);
     } catch (error: any) {
       request.log.error(error);
       return reply.code(500).send({ error: 'An unexpected error occurred.' });
