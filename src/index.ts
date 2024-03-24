@@ -1,26 +1,32 @@
 import fastify, { FastifyInstance } from 'fastify';
 import prisma from './database';
+import { categoryRoutes } from './routes/category';
 
-const app: FastifyInstance = fastify({ logger: true });
-
-app.get('/', async (request, reply) => {
-  return { hello: 'world' };
-});
 
 prisma.$connect().then(() => {
     console.log('Successfully Connected to Database.');
   });
 
+  
+const build = async () => {
+    const app = fastify({ logger: true });
+    
+    app.register(categoryRoutes);
+    
+    return app;
+};
+    
 const PORT = process.env.PORT
 
 const start = async (PORT:any) => {
-  try {
-    await app.listen(PORT);
-    console.log(`Server is listening on ${PORT}`);
-  } catch (err) {
-    console.error(err);
-    process.exit(1);
-  }
+    const app = await build();
+    app.listen({ port: PORT, host: '127.0.0.1' })
+    .then(()=>{
+        console.log(`Server is listening on ${PORT}`)})
+    .catch((err)=>{
+        console.error('Error starting server:', err);
+        process.exit(1);
+    })
 };
 
 start(PORT);

@@ -10,9 +10,9 @@ generator client {
 
 model Category {
   id         String     @id @default(uuid())
-  name       String
+  name       String     @unique
   picture    String?
-  parentId  String?    
+  parentId   String?    
   created_at DateTime   @default(now()) @map(name: "created_at")
   updated_at DateTime   @default(now()) @updatedAt @map(name: "updated_at")
   children   Category[] @relation("CategoryToCategory")

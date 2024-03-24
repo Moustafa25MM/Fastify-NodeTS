@@ -14,22 +14,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const fastify_1 = __importDefault(require("fastify"));
 const database_1 = __importDefault(require("./database"));
-const app = (0, fastify_1.default)({ logger: true });
-app.get('/', (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
-    return { hello: 'world' };
-}));
+const category_1 = require("./routes/category");
 database_1.default.$connect().then(() => {
     console.log('Successfully Connected to Database.');
 });
+const build = () => __awaiter(void 0, void 0, void 0, function* () {
+    const app = (0, fastify_1.default)({ logger: true });
+    app.register(category_1.categoryRoutes);
+    return app;
+});
 const PORT = process.env.PORT;
 const start = (PORT) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        yield app.listen(PORT);
+    const app = yield build();
+    app.listen({ port: PORT, host: '127.0.0.1' })
+        .then(() => {
         console.log(`Server is listening on ${PORT}`);
-    }
-    catch (err) {
-        console.error(err);
+    })
+        .catch((err) => {
+        console.error('Error starting server:', err);
         process.exit(1);
-    }
+    });
 });
 start(PORT);
