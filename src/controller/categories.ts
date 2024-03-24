@@ -1,9 +1,20 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import prisma from '../database';
-import { CategoryCreateBody, CategoryRequest } from '../types';
+import { Category, CategoryCreateBody, CategoryRequest } from '../types';
 
 export const createCategory = async (request: FastifyRequest<{ Body: CategoryCreateBody }>, reply: FastifyReply) => {
     const { name, picture, parentId } = request.body;
+
+    if (parentId) {
+        const parentCategory = await prisma.category.findUnique({
+          where: { id: parentId },
+        });
+    
+        if (!parentCategory) {
+          return reply.code(400).send({ error: 'Provided parentId does not exist.' });
+        }
+      }
+      
     try {
       const newCategory = await prisma.category.create({
         data: {
@@ -20,6 +31,32 @@ export const createCategory = async (request: FastifyRequest<{ Body: CategoryCre
     return reply.code(409).send({ error: 'Category name already exists.' });
     }
   
+      return reply.code(500).send({ error: 'An unexpected error occurred.' });
+    }
+  };
+
+
+  const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
+    return categories
+      .filter(category => category.parentId === parentId)
+      .map(category => ({
+        ...category,
+        children: buildCategoryTree(categories, category.id)
+      }));
+  };
+  export const getCategoryTree = async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const categories = await prisma.category.findMany({
+        include: {
+          children: true, 
+        }
+      });
+      
+      const categoryTree = buildCategoryTree(categories);
+      
+      return reply.code(200).send(categoryTree);
+    } catch (error: any) {
+      request.log.error(error);
       return reply.code(500).send({ error: 'An unexpected error occurred.' });
     }
   };
