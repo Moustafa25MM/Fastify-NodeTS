@@ -93,3 +93,27 @@ export const createCategory = async (request: FastifyRequest<{ Body: CategoryCre
     }
       return reply.code(500).send({ error: 'An unexpected error occurred.' });
 };
+
+export const deleteCategory = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const { id } = request.params;
+
+    try {
+        
+    const children = await prisma.category.findMany({
+        where: { parentId: id },
+    });
+    
+    if (children.length > 0) {
+        return reply.code(400).send({ error: 'Category has child categories. Please delete or reassign them before deleting this category.' });
+        }
+
+    await prisma.category.delete({
+    where: { id }
+    });
+
+    return reply.code(204).send({msg : 'Deleted Successfully'});
+    } catch (error: any) {
+      request.log.error(error);
+      return reply.code(500).send({ error: 'An unexpected error occurred.' });
+    }
+};
