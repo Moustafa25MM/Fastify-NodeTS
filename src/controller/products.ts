@@ -63,3 +63,54 @@ export const getProducts = async (request: FastifyRequest<{ Params: { id: string
         return reply.code(500).send({ error: 'An unexpected error occurred.' });
     }
 };
+
+export const updateProduct = async (request: FastifyRequest<{ Body: ProductUpdateBody; Params: { id: string } }>, reply: FastifyReply) => {
+    const { id } = request.params;
+    const { name, picture, categoryId } = request.body;
+
+    let updateData: any = {
+        name,
+        picture,
+    };
+
+    if (categoryId) {
+        const category = await prisma.category.findUnique({
+            where: { id: categoryId },
+        });
+
+        if (!category) {
+            return reply.code(400).send({ error: 'Category ID does not exist.' });
+        }
+        updateData.categoryId = categoryId;
+    }else {
+        const currentProduct = await prisma.product.findUnique({
+            where: { id },
+            select: { categoryId: true }
+        });
+
+        if (!currentProduct) {
+            return reply.code(404).send({ error: 'Product not found.' });
+        }
+
+        updateData.categoryId = currentProduct.categoryId;
+    }
+
+
+    
+    try {
+        const updatedProduct = await prisma.product.update({
+            where: { id },
+            data: updateData,
+        });
+
+        return reply.code(200).send(updatedProduct);
+    } catch (error: any) {
+        request.log.error(error);
+
+        if (error.code === 'P2002') {
+            return reply.code(409).send({ error: 'Product name already exists.' });
+        }
+
+        return reply.code(500).send({ error: 'An unexpected error occurred.' });
+    }
+};
