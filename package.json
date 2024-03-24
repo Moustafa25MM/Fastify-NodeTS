@@ -8,6 +8,8 @@
     "prestart": "npm run build",
     "start": "node dist/index.js",
     "predev": "npm run build",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
     "dev": "concurrently \"npx tsc -w\"  \" nodemon dist/index.js\" ",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

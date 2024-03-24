@@ -1,0 +1,36 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+model Category {
+  id         String     @id @default(uuid())
+  name       String
+  picture    String?
+  parentId  String?    
+  created_at DateTime   @default(now()) @map(name: "created_at")
+  updated_at DateTime   @default(now()) @updatedAt @map(name: "updated_at")
+  children   Category[] @relation("CategoryToCategory")
+  products   Product[]
+
+  parent     Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+
+  @@map(name: "categories")
+}
+
+model Product {
+  id         String   @id @default(uuid())
+  name       String
+  picture    String?
+  category   Category @relation(fields: [category_id], references: [id])
+  category_id String
+  created_at DateTime @default(now()) @map(name: "created_at")
+  updated_at DateTime @default(now()) @updatedAt @map(name: "updated_at")
+
+  @@map(name: "products")
+}
