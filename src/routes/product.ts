@@ -1,19 +1,10 @@
 import { FastifyInstance, FastifyPluginOptions, HookHandlerDoneFunction } from 'fastify';
 import { createProduct, deleteProduct, getProductById, getProducts, updateProduct } from '../controller/products';
+import { productUpload } from '../middlewares/uploadImages';
 
 export const productRoutes = (fastify: FastifyInstance, options: FastifyPluginOptions, done: HookHandlerDoneFunction) => {
     fastify.post('/products', {
-        schema: {
-            body: {
-                type: 'object',
-                required: ['name', 'categoryId'],
-                properties: {
-                    name: { type: 'string' },
-                    picture: { type: 'string', format: 'uri' },
-                    categoryId: { type: 'string' }
-                }
-            }
-        }
+        preHandler: productUpload.single('picture'),
     }, createProduct);
 
     fastify.get('/products/all',getProducts);

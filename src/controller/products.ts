@@ -1,9 +1,26 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import prisma from '../database';
 import { Product, ProductCreateBody, ProductUpdateBody, ProductRequest } from '../types/product';
+import { cloudi } from '../middlewares/uploadImages';
 
-export const createProduct = async (request: FastifyRequest<{ Body: ProductCreateBody }>, reply: FastifyReply) => {
-    const { name, picture, categoryId } = request.body;
+export const createProduct = async (request:any, reply: FastifyReply) => {
+    const { name, categoryId } = request.body;
+    let picture = '';
+    if(request.file){
+        const uploadedImg = await cloudi.uploader.upload(request.file.path, {
+            public_id: `${Date.now}_product`,
+            width: 500,
+            height: 500,
+            crop: 'fill',
+        });      
+        picture = uploadedImg.url;
+    }
+
+    const err = request.fileValidationError;
+    if (err) {
+        return reply.status(400).send(err);
+    }
+
 
     const category = await prisma.category.findUnique({
         where: { id: categoryId },

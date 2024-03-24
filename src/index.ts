@@ -2,7 +2,7 @@ import fastify, { FastifyInstance } from 'fastify';
 import prisma from './database';
 import { categoryRoutes } from './routes/category';
 import { productRoutes } from './routes/product';
-
+import multer from 'fastify-multer';
 
 prisma.$connect().then(() => {
     console.log('Successfully Connected to Database.');
@@ -11,6 +11,8 @@ prisma.$connect().then(() => {
   
 const build = async () => {
     const app = fastify({ logger: true });
+    
+    app.register(multer.contentParser); 
     
     app.register(categoryRoutes);
     app.register(productRoutes);
