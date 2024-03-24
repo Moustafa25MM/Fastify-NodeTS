@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import prisma from '../database';
-import { Category, CategoryCreateBody, CategoryRequest } from '../types';
+import { Category, CategoryCreateBody } from '../types/category';
 
 export const createCategory = async (request: FastifyRequest<{ Body: CategoryCreateBody }>, reply: FastifyReply) => {
     const { name, picture, parentId } = request.body;
