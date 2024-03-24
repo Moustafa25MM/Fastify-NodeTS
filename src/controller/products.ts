@@ -114,3 +114,17 @@ export const updateProduct = async (request: FastifyRequest<{ Body: ProductUpdat
         return reply.code(500).send({ error: 'An unexpected error occurred.' });
     }
 };
+
+export const deleteProduct = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const { id } = request.params;
+
+    try {
+        await prisma.product.delete({
+            where: { id }
+        });
+        return reply.code(204).send();
+    } catch (error: any) {
+        request.log.error(error);
+        return reply.code(500).send({ error: 'An unexpected error occurred.' });
+    }
+};

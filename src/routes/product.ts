@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions, HookHandlerDoneFunction } from 'fastify';
-import { createProduct, getProductById, getProducts, updateProduct } from '../controller/products';
+import { createProduct, deleteProduct, getProductById, getProducts, updateProduct } from '../controller/products';
 
 export const productRoutes = (fastify: FastifyInstance, options: FastifyPluginOptions, done: HookHandlerDoneFunction) => {
     fastify.post('/products', {
@@ -48,6 +48,18 @@ export const productRoutes = (fastify: FastifyInstance, options: FastifyPluginOp
             }
         }
     }, updateProduct);
+    
+    fastify.delete('/products/:id', {
+        schema: {
+            params: {
+                type: 'object',
+                properties: {
+                    id: { type: 'string' }
+                },
+                required: ['id']
+            }
+        }
+    }, deleteProduct);
     
     done();
 };
