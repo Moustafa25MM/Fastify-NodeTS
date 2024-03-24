@@ -12,7 +12,7 @@ export const createProduct = async (request: FastifyRequest<{ Body: ProductCreat
     if (!category) {
         return reply.code(400).send({ error: 'Category ID does not exist.' });
     }
-    
+
     try {
         const newProduct = await prisma.product.create({
             data: {
@@ -29,6 +29,37 @@ export const createProduct = async (request: FastifyRequest<{ Body: ProductCreat
             return reply.code(409).send({ error: 'Product name already exists.' });
         }
 
+        return reply.code(500).send({ error: 'An unexpected error occurred.' });
+    }
+};
+
+export const getProductById = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const { id } = request.params;
+
+    try {
+        const product = await prisma.product.findUnique({
+            where: { id }
+        });
+
+        if (!product) {
+            return reply.code(404).send({ error: 'Product not found.' });
+        }
+
+        return reply.code(200).send(product);
+    } catch (error: any) {
+        request.log.error(error);
+        return reply.code(500).send({ error: 'An unexpected error occurred.' });
+    }
+};
+
+export const getProducts = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+
+    try {
+        const products = await prisma.product.findMany();
+
+        return reply.code(200).send(products);
+    } catch (error: any) {
+        request.log.error(error);
         return reply.code(500).send({ error: 'An unexpected error occurred.' });
     }
 };
