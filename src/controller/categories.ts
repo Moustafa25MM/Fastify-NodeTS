@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import prisma from '../database';
 import { Category, CategoryCreateBody } from '../types/category';
+import { buildCategoryTree, buildCategoryTreeWithProducts, countProductsInCategory } from '../utils/categoryUtils';
 
 export const createCategory = async (request: FastifyRequest<{ Body: CategoryCreateBody }>, reply: FastifyReply) => {
     const { name, picture, parentId } = request.body;
@@ -35,31 +36,6 @@ export const createCategory = async (request: FastifyRequest<{ Body: CategoryCre
     }
   };
 
-  const countProductsInCategory = (category: Category, allCategories: Category[]): number => {
-    let count = category.products ? category.products.length : 0;
-    if (category.children && category.children.length > 0) {
-        for (const child of category.children) {
-            const childCategory = allCategories.find(c => c.id === child.id);
-            if (childCategory) {
-                count += countProductsInCategory(childCategory, allCategories);
-            }
-        }
-    }
-    return count;
-};
-
-
-
-
-const buildCategoryTreeWithProducts = (categories: Category[], parentId: string | null = null): Category[] => {
-    return categories
-        .filter(category => category.parentId === parentId)
-        .map(category => ({
-            ...category,
-            children: buildCategoryTreeWithProducts(categories, category.id),
-            productsCount: countProductsInCategory(category, categories)
-        }));
-};
 
 export const getCategoryTreeWithProductsCount = async (request: FastifyRequest, reply: FastifyReply) => {
     try {
@@ -125,16 +101,6 @@ export const getCategoryByIdWithProductsCount = async (request: FastifyRequest<{
 };
 
 
-
-
-  const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
-    return categories
-      .filter(category => category.parentId === parentId)
-      .map(category => ({
-        ...category,
-        children: buildCategoryTree(categories, category.id)
-      }));
-  };
   export const getCategoryTree = async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const categories = await prisma.category.findMany({
