@@ -2,20 +2,40 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import prisma from '../database';
 import { Product, ProductCreateBody, ProductUpdateBody, ProductRequest } from '../types/product';
 import { cloudi } from '../middlewares/uploadImages';
+import sharp from 'sharp';
 
 export const createProduct = async (request:any, reply: FastifyReply) => {
     const { name, categoryId } = request.body;
-    let picture = '';
-    if(request.file){
-        const uploadedImg = await cloudi.uploader.upload(request.file.path, {
-            public_id: `${Date.now}_product`,
-            width: 500,
-            height: 500,
-            crop: 'fill',
-        });      
-        picture = uploadedImg.url;
+    let picture : any= '';
+    if (request.file) {
+        const resizedImageBuffer = await sharp(request.file.path)
+          .resize(3200, 3200)
+          .toBuffer();
+      
+        try {
+            const uploadResponse = await new Promise<any>((resolve, reject) => {
+                cloudi.uploader.upload_stream(
+                  {
+                    resource_type: 'auto',
+                    public_id: `${Date.now()}_product`,
+                  },
+                  (error, result) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(result);
+                    }
+                  }
+                ).end(resizedImageBuffer);
+            });
+            
+            picture = uploadResponse?.url || '';
+        } catch (error) {
+            console.error(error);
+            return reply.status(500).send({ error: 'An unexpected error occurred during image upload.' });
+        }
     }
-
+    
     const err = request.fileValidationError;
     if (err) {
         return reply.status(400).send(err);

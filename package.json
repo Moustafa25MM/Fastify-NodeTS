@@ -25,6 +25,7 @@
     "helmet": "^7.1.0",
     "morgan": "^1.10.0",
     "rimraf": "^5.0.5",
+    "sharp": "^0.33.3",
     "winston": "^3.12.0"
   },
   "devDependencies": {
