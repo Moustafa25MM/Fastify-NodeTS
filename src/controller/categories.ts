@@ -3,19 +3,39 @@ import prisma from '../database';
 import { Category, CategoryCreateBody } from '../types/category';
 import { buildCategoryTree, buildCategoryTreeWithProducts, countProductsInCategory } from '../utils/categoryUtils';
 import { cloudi } from '../middlewares/uploadImages';
+import sharp from 'sharp';
 
 export const createCategory = async (request: any, reply: FastifyReply) => {
     const { name, parentId } = request.body;
 
     let picture = '';
-    if(request.file){
-        const uploadedImg = await cloudi.uploader.upload(request.file.path, {
-            public_id: `${Date.now}_product`,
-            width: 500,
-            height: 500,
-            crop: 'fill',
-        });      
-        picture = uploadedImg.url;
+    if (request.file) {
+        const resizedImageBuffer = await sharp(request.file.path)
+          .resize(3200, 3200)
+          .toBuffer();
+      
+        try {
+            const uploadResponse = await new Promise<any>((resolve, reject) => {
+                cloudi.uploader.upload_stream(
+                  {
+                    resource_type: 'auto',
+                    public_id: `${Date.now()}_category`,
+                  },
+                  (error, result) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(result);
+                    }
+                  }
+                ).end(resizedImageBuffer);
+            });
+            
+            picture = uploadResponse?.url || '';
+        } catch (error) {
+            console.error(error);
+            return reply.status(500).send({ error: 'An unexpected error occurred during image upload.' });
+        }
     }
 
     const err = request.fileValidationError;

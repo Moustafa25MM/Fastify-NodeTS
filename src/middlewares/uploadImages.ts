@@ -11,7 +11,7 @@ cloudi.config({
 });
 
 const randomNumber = Math.floor(Math.random() * (1000 - 1 + 1)) + 1;
-const maxSize = 1024 * 1024 * 5;
+const maxSize = 1024 * 1024 * 2;
 
 const productStorage = multer.diskStorage({
     destination: (req, file, cb) => {
