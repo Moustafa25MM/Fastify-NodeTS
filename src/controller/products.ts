@@ -5,7 +5,7 @@ import { cloudi } from '../middlewares/uploadImages';
 import sharp from 'sharp';
 
 export const createProduct = async (request:any, reply: FastifyReply) => {
-    const { name, categoryId } = request.body;
+    let { name, categoryId , price } = request.body;
     let picture : any= '';
     if (request.file) {
         const resizedImageBuffer = await sharp(request.file.path)
@@ -41,6 +41,10 @@ export const createProduct = async (request:any, reply: FastifyReply) => {
         return reply.status(400).send(err);
     }
 
+    price = parseFloat(price);
+    if (isNaN(price)) {
+        return reply.status(400).send({ error: 'Invalid price format' });
+    }
 
     const category = await prisma.category.findUnique({
         where: { id: categoryId },
@@ -55,7 +59,8 @@ export const createProduct = async (request:any, reply: FastifyReply) => {
             data: {
                 name,
                 picture,
-                categoryId
+                categoryId,
+                price
             }
         });
         return reply.code(201).send(newProduct);
@@ -103,13 +108,20 @@ export const getProducts = async (request: FastifyRequest<{ Params: { id: string
 
 export const updateProduct = async (request: FastifyRequest<{ Body: ProductUpdateBody; Params: { id: string } }>, reply: FastifyReply) => {
     const { id } = request.params;
-    const { name, picture, categoryId } = request.body;
+    let { name, picture, categoryId , price } = request.body;
 
     let updateData: any = {
         name,
         picture,
+        price,
     };
 
+    if(price){
+        price = parseFloat(price);
+        if (isNaN(price)) {
+            return reply.status(400).send({ error: 'Invalid price format' });
+        }
+    }
     if (categoryId) {
         const category = await prisma.category.findUnique({
             where: { id: categoryId },

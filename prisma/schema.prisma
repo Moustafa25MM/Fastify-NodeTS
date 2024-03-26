@@ -27,6 +27,7 @@ model Product {
   id         String   @id @default(uuid())
   name       String
   picture    String?
+  price      Float
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId String
   created_at DateTime @default(now()) @map(name: "created_at")

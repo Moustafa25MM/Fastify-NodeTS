@@ -34,7 +34,8 @@ export const productRoutes = (fastify: FastifyInstance, options: FastifyPluginOp
                 properties: {
                     name: { type: 'string' },
                     picture: { type: 'string', format: 'uri' },
-                    categoryId: { type: 'string' }
+                    categoryId: { type: 'string' },
+                    price:{type : 'number'}
                 }
             }
         }

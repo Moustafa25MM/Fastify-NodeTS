@@ -17,10 +17,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fastify/cors": "^9.0.1",
     "@prisma/client": "^5.11.0",
     "cloudinary": "^2.0.3",
     "dotenv": "^16.4.5",
     "fastify": "^4.26.2",
+    "fastify-cors": "^6.1.0",
     "fastify-multer": "^2.0.3",
     "helmet": "^7.1.0",
     "morgan": "^1.10.0",
@@ -30,6 +32,7 @@
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.7",
+    "@types/fastify-cors": "^2.1.0",
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.11.30",
     "@typescript-eslint/eslint-plugin": "^7.3.1",
