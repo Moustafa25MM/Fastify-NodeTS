@@ -15,8 +15,8 @@ docker-compose build
 docker-compose up
 
 or :
-
 npm install
+npm run db:push  --> to migrate Database
 npm start
 ```
 
