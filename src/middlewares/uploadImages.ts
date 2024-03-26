@@ -1,7 +1,7 @@
-import multer from 'fastify-multer';
 import path from 'path';
 
-import cloudinary from 'cloudinary';
+const cloudinary = require('cloudinary');
+const multer = require('fastify-multer');
 
 const cloudi = cloudinary.v2;
 cloudi.config({
@@ -14,21 +14,21 @@ const randomNumber = Math.floor(Math.random() * (1000 - 1 + 1)) + 1;
 const maxSize = 1024 * 1024 * 2;
 
 const productStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
+    destination: (req:any, file:any, cb:any) => {
         const uploadPath = path.join(__dirname, '../..', 'uploadedImages', 'products');
         cb(null, uploadPath);
     },
-    filename: (req, file, cb) => {
+    filename: (req:any, file:any, cb:any) => {
       cb(null, Date.now() + randomNumber.toString() + file.originalname);
     },
   });
 
   const categoryStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
+    destination: (req:any, file:any, cb:any) => {
         const uploadPath = path.join(__dirname, '../..', 'uploadedImages', 'categories');
         cb(null, uploadPath);
     },
-    filename: (req, file, cb) => {
+    filename: (req:any, file:any, cb:any) => {
       cb(null, Date.now() + randomNumber.toString() + file.originalname);
     },
   });

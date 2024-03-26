@@ -1,4 +1,3 @@
-import { FastifyInstance, FastifyRequest, RouteGenericInterface } from 'fastify';
 import { Product } from './product';
 
 export interface Category {
@@ -16,10 +15,8 @@ export interface CategoryCreateBody {
   parentId?: string;
 }
 
-interface CategoryRouteGeneric extends RouteGenericInterface {
+interface CategoryRouteGeneric  {
     Body: CategoryCreateBody;
   }
   
-  export interface CategoryRequest extends FastifyRequest<CategoryRouteGeneric> {}
   
-export type CategoryController = (fastify: FastifyInstance) => Promise<void>;

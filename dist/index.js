@@ -12,17 +12,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const fastify_1 = __importDefault(require("fastify"));
 const database_1 = __importDefault(require("./database"));
 const category_1 = require("./routes/category");
 const product_1 = require("./routes/product");
 const fastify_multer_1 = __importDefault(require("fastify-multer"));
 const cors_1 = __importDefault(require("@fastify/cors"));
+const fastify = require('fastify');
 database_1.default.$connect().then(() => {
     console.log('Successfully Connected to Database.');
 });
 const build = () => __awaiter(void 0, void 0, void 0, function* () {
-    const app = (0, fastify_1.default)({ logger: true });
+    const app = fastify({ logger: true });
     app.register(cors_1.default);
     app.register(fastify_multer_1.default.contentParser);
     app.register(category_1.categoryRoutes);

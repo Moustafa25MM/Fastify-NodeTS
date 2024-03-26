@@ -1,10 +1,10 @@
-import fastify, { FastifyInstance } from 'fastify';
 import prisma from './database';
 import { categoryRoutes } from './routes/category';
 import { productRoutes } from './routes/product';
 import multer from 'fastify-multer';
-import cors from '@fastify/cors'
+import cors from '@fastify/cors';
 
+const fastify = require('fastify');
 prisma.$connect().then(() => {
     console.log('Successfully Connected to Database.');
   });
@@ -29,7 +29,7 @@ const start = async (PORT:any) => {
     app.listen({ port: PORT, host: '127.0.0.1' })
     .then(()=>{
         console.log(`Server is listening on ${PORT}`)})
-    .catch((err)=>{
+    .catch((err:any)=>{
         console.error('Error starting server:', err);
         process.exit(1);
     })

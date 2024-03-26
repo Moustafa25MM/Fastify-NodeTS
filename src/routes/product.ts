@@ -1,8 +1,7 @@
-import { FastifyInstance, FastifyPluginOptions, HookHandlerDoneFunction } from 'fastify';
 import { createProduct, deleteProduct, getProductById, getProducts, updateProduct } from '../controller/products';
 import { productUpload } from '../middlewares/uploadImages';
 
-export const productRoutes = (fastify: FastifyInstance, options: FastifyPluginOptions, done: HookHandlerDoneFunction) => {
+export const productRoutes = (fastify: any, options: any, done: any) => {
     fastify.post('/products', {
         preHandler: productUpload.single('picture'),
     }, createProduct);

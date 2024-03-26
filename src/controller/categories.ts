@@ -1,27 +1,28 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
 import prisma from '../database';
 import { Category, CategoryCreateBody } from '../types/category';
 import { buildCategoryTree, buildCategoryTreeWithProducts, countProductsInCategory } from '../utils/categoryUtils';
 import { cloudi } from '../middlewares/uploadImages';
-import sharp from 'sharp';
+import jimp from 'jimp';
 
-export const createCategory = async (request: any, reply: FastifyReply) => {
+export const createCategory = async (request: any, reply: any) => {
     const { name, parentId } = request.body;
 
     let picture = '';
     if (request.file) {
-        const resizedImageBuffer = await sharp(request.file.path)
-          .resize(3200, 3200)
-          .toBuffer();
       
         try {
+            const image = await jimp.read(request.file.path);
+            image.resize(3200, 3200);
+            
+            const resizedImageBuffer = await image.getBufferAsync(jimp.MIME_PNG);
+            
             const uploadResponse = await new Promise<any>((resolve, reject) => {
                 cloudi.uploader.upload_stream(
                   {
                     resource_type: 'auto',
                     public_id: `${Date.now()}_category`,
                   },
-                  (error, result) => {
+                  (error:any, result:any) => {
                     if (error) {
                         reject(error);
                     } else {
@@ -74,7 +75,7 @@ export const createCategory = async (request: any, reply: FastifyReply) => {
   };
 
 
-export const getCategoryTreeWithProductsCount = async (request: FastifyRequest, reply: FastifyReply) => {
+export const getCategoryTreeWithProductsCount = async (request: any, reply: any) => {
     try {
         const categories = await prisma.category.findMany({
             include: {
@@ -93,7 +94,7 @@ export const getCategoryTreeWithProductsCount = async (request: FastifyRequest, 
 };
 
 
-export const getCategoryByIdWithProductsCount = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+export const getCategoryByIdWithProductsCount = async (request: any, reply: any) => {
     const { id } = request.params;
     
     try {
@@ -138,7 +139,7 @@ export const getCategoryByIdWithProductsCount = async (request: FastifyRequest<{
 };
 
 
-  export const getCategoryTree = async (request: FastifyRequest, reply: FastifyReply) => {
+  export const getCategoryTree = async (request: any, reply: any) => {
     try {
       const categories = await prisma.category.findMany({
         include: {
@@ -155,7 +156,7 @@ export const getCategoryByIdWithProductsCount = async (request: FastifyRequest<{
     }
   };
 
-  export const getCategories = async (request: FastifyRequest, reply: FastifyReply) => {
+  export const getCategories = async (request: any, reply: any) => {
     try {
       const categories = await prisma.category.findMany();
       
@@ -166,7 +167,7 @@ export const getCategoryByIdWithProductsCount = async (request: FastifyRequest<{
     }
   };
 
-  export const updateCategory = async (request: FastifyRequest<{ Params: { id: string }, Body: CategoryCreateBody }>, reply: FastifyReply) => {
+  export const updateCategory = async (request: any, reply: any) => {
     const { id } = request.params;
     const { name, picture, parentId } = request.body;
     try {
@@ -188,7 +189,7 @@ export const getCategoryByIdWithProductsCount = async (request: FastifyRequest<{
       return reply.code(500).send({ error: 'An unexpected error occurred.' });
 };
 
-export const deleteCategory = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+export const deleteCategory = async (request: any, reply: any) => {
     const { id } = request.params;
 
     try {
@@ -212,7 +213,7 @@ export const deleteCategory = async (request: FastifyRequest<{ Params: { id: str
     }
 };
 
-export const getCategoryById = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+export const getCategoryById = async (request: any, reply: any) => {
     const { id } = request.params;
     try {
       const category = await prisma.category.findUnique({

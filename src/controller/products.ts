@@ -1,31 +1,32 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
 import prisma from '../database';
-import { Product, ProductCreateBody, ProductUpdateBody, ProductRequest } from '../types/product';
+import { Product, ProductCreateBody, ProductUpdateBody } from '../types/product';
 import { cloudi } from '../middlewares/uploadImages';
-import sharp from 'sharp';
+import jimp from 'jimp';
 
-export const createProduct = async (request:any, reply: FastifyReply) => {
+
+export const createProduct = async (request:any, reply: any) => {
     let { name, categoryId , price } = request.body;
     let picture : any= '';
     if (request.file) {
-        const resizedImageBuffer = await sharp(request.file.path)
-          .resize(3200, 3200)
-          .toBuffer();
-      
         try {
+            const image = await jimp.read(request.file.path);
+            image.resize(3200, 3200);
+            
+            const resizedImageBuffer = await image.getBufferAsync(jimp.MIME_PNG);
+            
             const uploadResponse = await new Promise<any>((resolve, reject) => {
                 cloudi.uploader.upload_stream(
-                  {
-                    resource_type: 'auto',
-                    public_id: `${Date.now()}_product`,
-                  },
-                  (error, result) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve(result);
+                    {
+                        resource_type: 'auto',
+                        public_id: `${Date.now()}_product`,
+                    },
+                    (error: any, result: any) => {
+                        if (error) {
+                            reject(error);
+                        } else {
+                            resolve(result);
+                        }
                     }
-                  }
                 ).end(resizedImageBuffer);
             });
             
@@ -75,7 +76,7 @@ export const createProduct = async (request:any, reply: FastifyReply) => {
     }
 };
 
-export const getProductById = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+export const getProductById = async (request: any, reply: any) => {
     const { id } = request.params;
 
     try {
@@ -94,7 +95,7 @@ export const getProductById = async (request: FastifyRequest<{ Params: { id: str
     }
 };
 
-export const getProducts = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+export const getProducts = async (request: any, reply: any) => {
 
     try {
         const products = await prisma.product.findMany();
@@ -106,7 +107,7 @@ export const getProducts = async (request: FastifyRequest<{ Params: { id: string
     }
 };
 
-export const updateProduct = async (request: FastifyRequest<{ Body: ProductUpdateBody; Params: { id: string } }>, reply: FastifyReply) => {
+export const updateProduct = async (request:any, reply: any) => {
     const { id } = request.params;
     let { name, picture, categoryId , price } = request.body;
 
@@ -164,7 +165,7 @@ export const updateProduct = async (request: FastifyRequest<{ Body: ProductUpdat
     }
 };
 
-export const deleteProduct = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+export const deleteProduct = async (request: any, reply: any) => {
     const { id } = request.params;
 
     try {

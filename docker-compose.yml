@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '4300:4300'
+    environment:
+      - DATABASE_URL=mysql://root:root@db:3306/vartur
+      - PORT=4300
+      - CLOUDINARY_CLOUD_NAME=das9oh9bs
+      - CLOUDINARY_API_KEY=649543211737858
+      - CLOUDINARY_API_SECRET=Bz6GeXk4KuBOjMXCU4rkyR20A_U
+    depends_on:
+      - db
+    volumes:
+      - .:/usr/src/app
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: vartur
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:

@@ -1,8 +1,7 @@
-import { FastifyInstance, FastifyPluginOptions, HookHandlerDoneFunction } from 'fastify';
 import { createCategory, deleteCategory, getCategories, getCategoryById, getCategoryByIdWithProductsCount, getCategoryTree, getCategoryTreeWithProductsCount, updateCategory } from '../controller/categories';
 import { categoryUpload } from '../middlewares/uploadImages';
 
-export const categoryRoutes = (fastify: FastifyInstance, options: FastifyPluginOptions, done: HookHandlerDoneFunction) => {
+export const categoryRoutes = (fastify: any, options: any, done: any) => {
     fastify.post('/categories', {
         preHandler: categoryUpload.single('picture'),
     }, createCategory);
